@@ -87,16 +87,22 @@ class DataLoader:
             observation_end="2025-12-31",
         )
         
+        fed_funds = fred.get_series(
+            series_id="FEDFUNDS",
+            observation_start="2020-01-01",
+            observation_end="2025-12-31",
+        )
+        
 
         ten_year_minus_two_year = ten_year_minus_two_year.to_frame(name="10Y-2Y Treasury Yield Spread")
         interbank_rates = interbank_rates.to_frame(name="IR3TIB01GBM156N")
         uk_10_year_rates = uk_10_year_rates.to_frame(name="UK 10-Year Government Bond Yield")
+        fed_funds = fed_funds.to_frame(name="Federal Funds Rate")
         uk_spread = self._combine_data(interbank_rates, uk_10_year_rates)
         uk_spread['UK Bond Yield Spread'] = uk_spread['UK 10-Year Government Bond Yield'] - uk_spread['IR3TIB01GBM156N']
-        
-        uk_spread.drop(columns=['IR3TIB01GBM156N', 'UK 10-Year Government Bond Yield'], inplace=True)
 
         fred_data = self._combine_data(ten_year_minus_two_year, uk_spread)
+        fred_data = self._combine_data(fred_data, fed_funds)
 
         return fred_data
 
