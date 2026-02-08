@@ -99,11 +99,11 @@ class DataLoader:
                 cashflow = ticker.cashflow
                 balance = ticker.balance_sheet
             except Exception as e:
-                print(f"    Error fetching data for {symbol}: {e}")
+                print("    Error fetching data for %s: %s" % (symbol, e))
                 continue
 
             if cashflow.empty or balance.empty:
-                print(f"    No fundamental data for {symbol}")
+                print("    No fundamental data for %s" % symbol)
                 continue
 
             capex_data = cashflow.loc["Capital Expenditure"]
@@ -118,7 +118,7 @@ class DataLoader:
             )
 
             if capex_data is not None:
-                fund_df[f"{symbol}_capex"] = capex_data
+                fund_df[f"{symbol}_capex"] = capex_data * -1
 
             fund_df[f"{symbol}_debt_to_assets"] = (
                 fund_df[f"{symbol}_total_liabilities"]
@@ -127,7 +127,7 @@ class DataLoader:
 
             fund_df.index = pd.to_datetime(fund_df.index)
             fund_df = fund_df.sort_index()
-            fund_df_q = fund_df.resample("B").last().ffill(limit=8)
+            fund_df_q = fund_df.resample("B").last().ffill()
             fundamentals_list.append(fund_df_q)
 
         combined_data = fred_data.copy()
